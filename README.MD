@@ -2,25 +2,26 @@
 
 # 🌌 Based - by Sam aka vare
 
+
 <p align="center">
-  <img src="https://img.shields.io/badge/Licenza-MIT-8a2be2.svg?style=for-the-badge&labelColor=2d1b69" alt="Licenza: MIT"/>
-  <img src="https://img.shields.io/github/stars/realvare/based?style=for-the-badge&color=8a2be2&labelColor=2d1b69" alt="GitHub stelle"/>
-  <img src="https://img.shields.io/github/forks/realvare/based?style=for-the-badge&color=8a2be2&labelColor=2d1b69" alt="GitHub Forks"/>
+  <img src="https://img.shields.io/badge/Licenza-MIT-8a2be2.svg?style=for-the-badge&labelColor=2d1b69" alt="Licenza: MIT"/>
+  <img src="https://img.shields.io/github/stars/realvare/based?style=for-the-badge&color=8a2be2&labelColor=2d1b69" alt="GitHub stelle"/>
+  <img src="https://img.shields.io/github/forks/realvare/based?style=for-the-badge&color=8a2be2&labelColor=2d1b69" alt="GitHub Forks"/>
+</p>
+<div align="center">
+<p align="center">
+  <strong>💜 Una libreria WhatsApp Web API moderna, potente e veloce con supporto avanzato per LID/JID</strong>
 </p>
 
 <p align="center">
-  <strong>💜 Una libreria WhatsApp Web API moderna, potente e veloce con supporto avanzato per LID/JID</strong>
-</p>
-
-<p align="center">
-  <a href="#-caratteristiche-principali">Caratteristiche</a> •
-  <a href="#-installazione">Installazione</a> •
-  <a href="#-guida-rapida">Guida Rapida</a> •
-  <a href="#-documentazione-api">Documentazione API</a> •
-  <a href="#-messaggi-interattivi-e-bottoni">Messaggi Interattivi</a> •
-  <a href="#-fix-lidjid">Fix LID/JID</a> •
-  <a href="#-configurazione-avanzata">Configurazione Avanzata</a> •
-  <a href="#-supporto-e-community">Supporto</a>
+  <a href="#-caratteristiche-principali">Caratteristiche</a> •
+  <a href="#-installazione">Installazione</a> •
+  <a href="#-guida-rapida">Guida Rapida</a> •
+  <a href="#-documentazione-api">Documentazione API</a> •
+  <a href="#-messaggi-interattivi-e-bottoni">Messaggi Interattivi</a> •
+  <a href="#-fix-lidjid">Fix LID/JID</a> •
+  <a href="#-configurazione-avanzata">Configurazione Avanzata</a> •
+  <a href="#-supporto-e-community">Supporto</a>
 </p>
 
 </div>
@@ -50,46 +51,46 @@ import makeWASocket, { DisconnectReason, useMultiFileAuthState, getPerformanceCo
 
 // Configura performance e cache
 setPerformanceConfig({
-    performance: {
-        enableCache: true,
-        enableMetrics: true
-    },
-    debug: {
-        enableLidLogging: true,
-        logLevel: 'info'
-    }
+    performance: {
+        enableCache: true,
+        enableMetrics: true
+    },
+    debug: {
+        enableLidLogging: true,
+        logLevel: 'info'
+    }
 });
 
 async function startBot() {
-  // 🔐 Setup autenticazione multi-file per sessioni persistenti
-  const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
-  
-  // 🌐 Creazione del socket con configurazione base
-  const sock = makeWASocket({
-    auth: state,
-    printQRInTerminal: true, // Stampa QR nel terminale per scansione
-    logger: console,
-    browser: ['VareBot', 'Chrome', '4.0.0'], // Simula un browser
-  });
+  // 🔐 Setup autenticazione multi-file per sessioni persistenti
+  const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
+  
+  // 🌐 Creazione del socket con configurazione base
+  const sock = makeWASocket({
+    auth: state,
+    printQRInTerminal: true, // Stampa QR nel terminale per scansione
+    logger: console,
+    browser: ['VareBot', 'Chrome', '4.0.0'], // Simula un browser
+  });
 
-  // 📡 Gestione aggiornamenti connessione
-  sock.ev.on('connection.update', (update) => {
-    const { connection, lastDisconnect } = update;
-    
-    if (connection === 'close') {
-      const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
-      console.log('🔴 Connessione chiusa:', lastDisconnect?.error, 'Riconnessione:', shouldReconnect);
-      
-      if (shouldReconnect) {
-        startBot(); // Riconnessione automatica
-      }
-    } else if (connection === 'open') {
-      console.log('🟢 Connesso con successo!');
-    }
-  });
+  // 📡 Gestione aggiornamenti connessione
+  conn.ev.on('connection.update', (update) => {
+    const { connection, lastDisconnect } = update;
+    
+    if (connection === 'close') {
+      const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
+      console.log('🔴 Connessione chiusa:', lastDisconnect?.error, 'Riconnessione:', shouldReconnect);
+      
+      if (shouldReconnect) {
+        startBot(); // Riconnessione automatica
+      }
+    } else if (connection === 'open') {
+      console.log('🟢 Connesso con successo!');
+    }
+  });
 
-  // 💾 Salva credenziali automaticamente
-  sock.ev.on('creds.update', saveCreds);
+  // 💾 Salva credenziali automaticamente
+  conn.ev.on('creds.update', saveCreds);
 }
 
 startBot().catch(console.error);
@@ -102,32 +103,32 @@ import makeWASocket, { getSenderLid, toJid, getCacheStats, validateJid, Logger }
 
 // ... (codice di creazione sock qui)
 
-sock.ev.on('messages.upsert', ({ messages }) => {
-  for (const msg of messages) {
-    // 🔍 Estrai LID del mittente con validazione
-    const info = getSenderLid(msg);
-    
-    // ✅ Valida JID prima di usarlo
-    const validation = validateJid(info.jid);
-    if (!validation.isValid) {
-      Logger.error('JID non valido:', validation.error);
-      continue;
-    }
-    
-    const jid = toJid(info.lid); // Normalizza in JID
-    
-    Logger.info('💬 Messaggio da:', jid, 'Valid:', info.isValid);
-    console.log('📝 Contenuto:', msg.message?.conversation);
-    
-    // Rispondi automaticamente solo se valido
-    if (info.isValid) {
-      sock.sendMessage(jid, { text: 'Messaggio ricevuto!' });
-    }
-  }
-  
-  // 📊 Monitora performance cache
-  const stats = getCacheStats();
-  Logger.performance('Cache stats:', stats);
+conn.ev.on('messages.upsert', ({ messages }) => {
+  for (const msg of messages) {
+    // 🔍 Estrai LID del mittente con validazione
+    const info = getSenderLid(msg);
+    
+    // ✅ Valida JID prima di usarlo
+    const validation = validateJid(info.jid);
+    if (!validation.isValid) {
+      Logger.error('JID non valido:', validation.error);
+      continue;
+    }
+    
+    const jid = toJid(info.lid); // Normalizza in JID
+    
+    Logger.info('💬 Messaggio da:', jid, 'Valid:', info.isValid);
+    console.log('📝 Contenuto:', msg.message?.conversation);
+    
+    // Rispondi automaticamente solo se valido
+    if (info.isValid) {
+      conn.sendMessage(jid, { text: 'Messaggio ricevuto!' });
+    }
+  }
+  
+  // 📊 Monitora performance cache
+  const stats = getCacheStats();
+  Logger.performance('Cache stats:', stats);
 });
 ```
 
@@ -152,10 +153,10 @@ Crea un'istanza del socket WhatsApp. È il punto di ingresso principale.
 **Esempio:**
 ```typescript
 const sock = makeWASocket({
-  auth: state,
-  printQRInTerminal: true,
-  logger: console,
-  browser: ['Varebot', 'Chrome', '4.0.0'],
+  auth: state,
+  printQRInTerminal: true,
+  logger: console,
+  browser: ['Varebot', 'Chrome', '4.0.0'],
 });
 ```
 </details>
@@ -174,7 +175,7 @@ Gestisce l'autenticazione persistente salvando credenziali in file multipli per 
 **Esempio:**
 ```typescript
 const { state, saveCreds } = await useMultiFileAuthState('auth_info');
-sock.ev.on('creds.update', saveCreds); // Integra nel socket
+conn.ev.on('creds.update', saveCreds); // Integra nel socket
 ```
 </details>
 
@@ -194,7 +195,7 @@ Utilità per gestire LID/JID, risolvendo problemi comuni in gruppi e multi-dispo
 ```typescript
 const info = getSenderLid(msg);
 const jid = toJid(info.lid);
-sock.sendMessage(jid, { text: 'Risposta personalizzata' });
+conn.sendMessage(jid, { text: 'Risposta personalizzata' });
 ```
 </details>
 
@@ -210,24 +211,24 @@ Invia messaggi di vari tipi. Supporta testo, media, interattivi.
 
 **Esempio Testo Semplice:**
 ```typescript
-await sock.sendMessage(jid, { text: 'Ciao Mondo!' });
+await conn.sendMessage(jid, { text: 'Ciao Mondo!' });
 ```
 </details>
 
 ### 🎯 Eventi Principali
 
-| Evento              | Descrizione                          | Callback Signature          |
+| Evento              | Descrizione                          | Callback Signature          |
 |---------------------|--------------------------------------|-----------------------------|
-| `connection.update` | Aggiornamenti stato connessione     | `(update: Partial<ConnectionState>) => void` |
-| `creds.update`      | Aggiornamento credenziali           | `() => void`                |
-| `messages.upsert`   | Nuovi messaggi o aggiornamenti       | `({ messages: WAMessage[], type: MessageUpsertType }) => void` |
-| `messages.update`   | Modifiche a messaggi esistenti       | `(update: WAMessageUpdate[]) => void` |
+| `connection.update` | Aggiornamenti stato connessione     | `(update: Partial<ConnectionState>) => void` |
+| `creds.update`      | Aggiornamento credenziali           | `() => void`                |
+| `messages.upsert`   | Nuovi messaggi o aggiornamenti       | `({ messages: WAMessage[], type: MessageUpsertType }) => void` |
+| `messages.update`   | Modifiche a messaggi esistenti       | `(update: WAMessageUpdate[]) => void` |
 | `group-participants.update` | Cambiamenti partecipanti gruppo | `(update: GroupParticipantEvent) => void` |
 
 **Esempio Registrazione Evento:**
 ```typescript
-sock.ev.on('group-participants.update', (update) => {
-  console.log('Partecipante aggiornato:', update);
+conn.ev.on('group-participants.update', (update) => {
+  console.log('Partecipante aggiornato:', update);
 });
 ```
 
@@ -235,122 +236,216 @@ sock.ev.on('group-participants.update', (update) => {
 
 ## 🎪 Messaggi Interattivi e Bottoni
 
-La libreria supporta messaggi interattivi avanzati, inclusi bottoni, liste, carousel e template. Questi sono utili per bot conversazionali.
+### Metodi per Messaggi Non Interattivi
 
-### Esempio Carousel (Cards)
+Questi metodi inviano contenuti semplici senza elementi cliccabili.
 
-Crea messaggi con carte multiple, immagini e bottoni URL.
+#### Messaggi di Testo
+Invia un messaggio di testo semplice, con supporto per menzioni.
 
 ```typescript
-await sock.sendMessage(jid, {
-  text: '〖 🌸 〗 Benvenuto in VareBot!',
-  title: '',
-  footer: '',
-  cards: [
-    {
-      image: { url: 'https://i.ibb.co/hJW7Wwx/varebot.jpg' },
-      title: 'by sam aka vare',
-      body: '〖 💫 〗 Esplora funzionalità\n〖 🚀 〗 Bot aggiornato',
-      footer: '˗ˏˋ ☾ 𝚟𝚊𝚛𝚎𝚋𝚘𝚝 ☽ ˎˊ˗',
-      buttons: [
-        { name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: 'Sito VareBot', url: 'https://varebot.netlify.app' }) },
-        { name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '💻 GitHub', url: 'https://github.com/realvare' }) },
-        { name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '💬 WhatsApp', url: 'https://wa.me/393476686131' }) },
-        { name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '📸 Instagram', url: 'https://instagram.com/samakavare' }) },
-        { name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '📧 Email', url: 'mailto:samakavare1@gmail.com' }) },
-      ],
-    },
-  ],
+await conn.sendMessage(jid, { 
+  text: 'finchevedotuttoviolaviola', 
+  mentions: ['393476686131@s.whatsapp.net'] 
+});
+```
+
+#### Messaggi Immagine
+Invia un'immagine con caption opzionale.
+
+```typescript
+await conn.sendMessage(jid, { 
+  image: { url: 'https://i.ibb.co/hJW7Wwx/varebot.jpg' }, 
+  caption: 'out soon!' 
+});
+```
+
+#### Messaggi Video
+Invia un video con caption e mimetype.
+
+```typescript
+await conn.sendMessage(jid, { 
+  video: { url: 'https://example.com/video.mp4' }, 
+  caption: 'peak!', 
+  mimetype: 'video/mp4' 
+});
+```
+
+#### Messaggi Audio
+Invia un file audio (nota vocale o file).
+
+```typescript
+await conn.sendMessage(jid, { 
+  audio: { url: 'https://esempio.com/audio.ogg' }, 
+  mimetype: 'audio/ogg; codecs=opus' 
+});
+```
+
+#### Messaggi Documento
+Invia un documento con titolo e descrizione.
+
+```typescript
+await conn.sendMessage(jid, { 
+  document: { url: 'https://esempio.com/file.pdf' }, 
+  mimetype: 'application/pdf', 
+  fileName: 'documento.pdf', 
+  fileLength: 1024 
+});
+```
+
+#### Messaggi Sticker
+Invia uno sticker (animato o statico).
+
+```typescript
+await conn.sendMessage(jid, { 
+  sticker: { url: 'https://i.ibb.co/4nxpDtTS/shhh2.webp' }, 
+  mimetype: 'image/webp' 
+});
+```
+
+#### Messaggi Posizione
+Invia una posizione geografica.
+
+```typescript
+await conn.sendMessage(jid, { 
+  location: { 
+    degreesLatitude: 45.4642, 
+    degreesLongitude: 9.1900, 
+    name: 'Milano, Italia' 
+  } 
+});
+```
+
+#### Messaggi Contatto
+Invia un vCard di un contatto.
+
+```typescript
+await conn.sendMessage(jid, { 
+  contacts: { 
+    displayName: 'Sam aka vare', 
+    contacts: [{ vcard: 'BEGIN:VCARD\nVERSION:3.0\nFN:Sam\nTEL;waid=393476686131:+39 347 6686131\nEND:VCARD' }] 
+  } 
+});
+```
+
+#### Messaggi Poll (Sondaggio)
+Invia un sondaggio con opzioni.
+
+```typescript
+await conn.sendMessage(jid, { 
+  poll: { 
+    name: 'Anime preferito?', 
+    values: ['Aot', 'Bleach', 'Death note'], 
+    selectableCount: 1 // quante scelte possibili
+  } 
+});
+```
+
+#### Reazioni ai Messaggi
+Aggiunge una reazione a un messaggio esistente.
+
+```typescript
+await conn.sendMessage(jid, { 
+  react: { 
+    text: '🍥', 
+    key: msg.key  // Key del messaggio da reagire
+  } 
+});
+```
+
+#### Album (Multi-Media)
+Invia un album di immagini/video misti.
+
+```typescript
+await conn.sendMessage(jid, {
+  album: [
+    { image: { url: 'img1.jpg' }, caption: 'Foto 1' },
+    { video: { url: 'vid1.mp4' }, caption: 'Video 1' },
+  ],
+});
+```
+
+### Metodi per Messaggi Interattivi
+
+Questi messaggi includono elementi interattivi come bottoni, liste e template.
+
+#### Messaggi con Bottoni Semplici
+Invia bottoni di risposta rapida.
+
+```typescript
+await conn.sendMessage(jid, {
+  text: 'Scegli un\'opzione:',
+  footer: 'Footer',
+  buttons: [
+    { buttonId: 'cmd1', buttonText: { displayText: 'testo1' }, type: 1 },
+    { buttonId: 'cmd2', buttonText: { displayText: 'testo2' }, type: 1 },
+  ],
+  headerType: 1,
+});
+```
+
+#### Messaggi con Bottoni e Immagine
+Combina immagine con bottoni.
+
+```typescript
+await conn.sendMessage(jid, {
+  image: { url: 'https://i.ibb.co/hJW7Wwx/varebot.jpg' },
+  caption: 'Messaggio con bottoni e immagine',
+  footer: 'vare ✧ bot',
+  buttons: [
+    { buttonId: 'cmd', buttonText: { displayText: 'testo1' }, type: 1 },
+  ],
+});
+```
+
+#### Messaggi Liste (Sezioni)
+Invia una lista di opzioni (solo in privato).
+
+```typescript
+await conn.sendMessage(jid, {
+  text: 'Questa è una lista!',
+  footer: 'purplepurplepurple!',
+  title: 'Titolo Lista',
+  buttonText: 'Visualizza Lista',
+  sections: [
+    { 
+      title: 'Sezione 1', 
+      rows: [ 
+        { title: 'Opzione 1', rowId: 'opt1' }, 
+        { title: 'Opzione 2', rowId: 'opt2', description: 'Descrizione' } 
+      ] 
+    },
+  ],
+});
+```
+
+#### Messaggi Carousel (Cards)
+Invia un carousel di carte con bottoni URL.
+
+```typescript
+await conn.sendMessage(jid, {
+  text: '〖 🌸 〗 Benvenuto in VareBot!',
+  title: '',
+  footer: '',
+  cards: [
+    {
+      image: { url: 'https://i.ibb.co/hJW7Wwx/varebot.jpg' },
+      title: 'by sam aka vare',
+      body: '〖 💫 〗 Esplora funzionalità\n〖 🚀 〗 Bot aggiornato',
+      footer: '˗ˏˋ ☾ 𝚟𝚊𝚛𝚎𝚋𝚘𝚝 ☽ ˎˊ˗',
+      buttons: [
+        { name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: 'Sito VareBot', url: 'https://varebot.netlify.app' }) },
+        { name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '💻 GitHub', url: 'https://github.com/realvare' }) },
+        { name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '💬 WhatsApp', url: 'https://wa.me/393476686131' }) },
+        { name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '📸 Instagram', url: 'https://instagram.com/samakavare' }) },
+        { name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '📧 Email', url: 'mailto:samakavare1@gmail.com' }) },
+      ],
+    },
+  ],
 }, { quoted: m });
 ```
 
-### Tipi di Messaggi Supportati
-
-#### Messaggi di Testo
-
-```typescript
-await sock.sendMessage(jid, { text: 'finchevedotuttoviolaviola', mentions: ['393476686131@s.whatsapp.net'] });
-```
-
-#### Messaggi Media
-
-- **Immagine con Caption:**
-  ```typescript
-  await sock.sendMessage(jid, { image: { url: 'https://i.ibb.co/hJW7WwxV/varebot.jpg' }, caption: 'out soon!' });
-  - { image: { url: 'media/menu.jpg' } // link o percorso ↑
-  ```
-
-- **Video:**
-  ```typescript
-  await sock.sendMessage(jid, { video: { url: 'https://example.com/video.mp4' }, caption: 'Video fantastico!', mimetype: 'video/mp4' });
-  ```
-
-- **Album (Multi-Media):**
-  ```typescript
-  await sock.sendMessage(jid, {
-    album: [
-      { image: { url: 'img1.jpg' }, caption: 'Foto 1' },
-      { video: { url: 'vid1.mp4' }, caption: 'Video 1' },
-    ],
-  });
-  ```
-
-#### Messaggi con Bottoni
-
-- **Bottoni Semplici:**
-  ```typescript
-  await sock.sendMessage(jid, {
-    text: 'Scegli un\'opzione:',
-    footer: 'Footer',
-    buttons: [
-      { buttonId: 'cmd2', buttonText: { displayText: 'testo1' }, type: 1 },
-      { buttonId: 'cmd2', buttonText: { displayText: 'testo2' }, type: 1 },
-    ],
-    headerType: 1,
-  });
-  ```
-
-- **Bottoni con Immagine:**
-  ```typescript
-  await sock.sendMessage(jid, {
-    image: { url: 'https://i.ibb.co/hJW7WwxV/varebot.jpg' },
-    caption: 'Messaggio con bottoni e immagine',
-    footer: 'vare ✧ bot',
-    buttons: [
-      { buttonId: 'cmd', buttonText: { displayText: 'testo1' }, type: 1 },
-    ],
-  });
-  ```
-
-#### Messaggi Interattivi Avanzati
-
-- **Con Quick Reply e URL:**
-  ```typescript
-  await sock.sendMessage(jid, {
-    text: 'Messaggio interattivo',
-    title: 'Titolo',
-    footer: 'Footer',
-    interactiveButtons: [
-      { name: 'quick_reply', buttonParamsJson: JSON.stringify({ display_text: 'testo1', id: 'cmd1' }) },
-      { name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: 'Visita Sito', url: 'varebot.netlify.app' }) },
-      { name: 'cta_copy', buttonParamsJson: JSON.stringify({ display_text: 'Copia Codice', copy_code: 'ABC123' }) },
-    ],
-  });
-  ```
-
-- **Liste Sezioni:**
-  ```typescript
-  await sock.sendMessage(jid, {
-    // funziona solo in privato
-    text: 'Questa è una lista!',
-    footer: 'purplepurplepurple!',
-    title: 'Titolo Lista',
-    buttonText: 'Visualizza Lista',
-    sections: [
-      { title: 'Sezione 1', rows: [{ title: 'Opzione 1', rowId: 'opt1' }, { title: 'Opzione 2', rowId: 'opt2', description: 'Descrizione' }] },
-    ],
-  });
-  ```
+> **Nota:** Per tutti i messaggi interattivi, assicurati di gestire le risposte nei listener `messages.upsert` verificando `msg.message.buttonsResponseMessage` o simili per estrarre le selezioni.
 
 ---
 
@@ -363,9 +458,9 @@ Il supporto LID/JID è un punto di forza di questa libreria, risolvendo problemi
 - **Nel Main (Avvio Bot):** Usa `getSenderLid` e `toJid` per normalizzare ID prima di qualsiasi operazione.
 - **In Handler Messaggi:** Integra nei listener per eventi come `messages.upsert` per gestire mittenti correttamente.
 - **Problemi Comuni e Fix:**
-  - **LID Mancante in Gruppi:** Usa `getSenderLid` per estrarre da messaggi.
-  - **Conversione JID:** Sempre converti con `toJid` per evitare errori in `sendMessage`.
-  - **Multi-Dispositivo:** Assicura compatibilità impostando `syncFullHistory: true` in config.
+  - **LID Mancante in Gruppi:** Usa `getSenderLid` per estrarre da messaggi.
+  - **Conversione JID:** Sempre converti con `toJid` per evitare errori in `sendMessage`.
+  - **Multi-Dispositivo:** Assicura compatibilità impostando `syncFullHistory: true` in config.
 
 ### Esempio Integrato in Main
 
@@ -374,17 +469,17 @@ Il supporto LID/JID è un punto di forza di questa libreria, risolvendo problemi
 import makeWASocket, { getSenderLid, toJid } from 'realvare/based';
 // ... (autenticazione e creazione sock)
 
-sock.ev.on('messages.upsert', async ({ messages }) => {
-  const msg = messages[0];
-  if (!msg.message) return;
+conn.ev.on('messages.upsert', async ({ messages }) => {
+  const msg = messages[0];
+  if (!msg.message) return;
 
-  const info = getSenderLid(msg);
-  const senderJid = toJid(info.lid); // Fix LID -> JID
+  const info = getSenderLid(msg);
+  const senderJid = toJid(info.lid); // Fix LID -> JID
 
-  // Esempio: Rispondi solo se JID valido
-  if (senderJid.endsWith('@s.whatsapp.net')) {
-    await sock.sendMessage(senderJid, { text: `Ciao da ${senderJid}!` }, { quoted: msg });
-  }
+  // Esempio: Rispondi solo se JID valido
+  if (senderJid.endsWith('@s.whatsapp.net')) {
+    await conn.sendMessage(senderJid, { text: `Ciao da ${senderJid}!` }, { quoted: msg });
+  }
 });
 ```
 
@@ -395,15 +490,15 @@ Crea un handler separato per modularità:
 ```typescript
 // handler.js
 export async function handleMessage(sock, msg) {
-  const info = getSenderLid(msg);
-  const jid = toJid(info.lid);
-  
-  // Log e risposta
-  console.log(`Messaggio da ${jid}`);
-  await sock.sendMessage(jid, { text: 'Handler attivato!' });
+  const info = getSenderLid(msg);
+  const jid = toJid(info.lid);
+  
+  // Log e risposta
+  console.log(`Messaggio da ${jid}`);
+  await conn.sendMessage(jid, { text: 'Handler attivato!' });
 }
 
-// Nel main: sock.ev.on('messages.upsert', ({ messages }) => handleMessage(sock, messages[0]));
+// Nel main: conn.ev.on('messages.upsert', ({ messages }) => handleMessage(sock, messages[0]));
 ```
 
 **Consiglio:** Testa in gruppi per verificare LID, poiché Baileys upstream ha migliorato il supporto nativo nel 2025, ma i fix personalizzati qui garantiscono retrocompatibilità.
@@ -421,12 +516,12 @@ import { getCacheStats, clearCache, setPerformanceConfig } from 'realvare/based'
 
 // Configura cache personalizzata
 setPerformanceConfig({
-    cache: {
-        lidCache: {
-            ttl: 10 * 60 * 1000, // 10 minuti
-            maxSize: 15000
-        }
-    }
+    cache: {
+        lidCache: {
+            ttl: 10 * 60 * 1000, // 10 minuti
+            maxSize: 15000
+        }
+    }
 });
 
 // Monitora performance
@@ -446,9 +541,9 @@ const jid = '1234567890@s.whatsapp.net';
 const validation = validateJid(jid);
 
 if (validation.isValid) {
-    Logger.info('JID valido:', jid);
+    Logger.info('JID valido:', jid);
 } else {
-    Logger.error('JID non valido:', validation.error);
+    Logger.error('JID non valido:', validation.error);
 }
 ```
 
@@ -459,11 +554,11 @@ import { Logger, setPerformanceConfig } from 'realvare/based';
 
 // Configura logging
 setPerformanceConfig({
-    debug: {
-        enableLidLogging: true,
-        enablePerformanceLogging: true,
-        logLevel: 'debug' // 'error', 'warn', 'info', 'debug'
-    }
+    debug: {
+        enableLidLogging: true,
+        enablePerformanceLogging: true,
+        logLevel: 'debug' // 'error', 'warn', 'info', 'debug'
+    }
 });
 
 // Usa logger condizionale
@@ -479,20 +574,20 @@ import { setPerformanceConfig, getPerformanceConfig } from 'realvare/based';
 
 // Configurazione completa
 setPerformanceConfig({
-    performance: {
-        enableCache: true,
-        enableMetrics: true,
-        batchSize: 100,
-        maxRetries: 3
-    },
-    cache: {
-        lidCache: { ttl: 5 * 60 * 1000, maxSize: 10000 },
-        jidCache: { ttl: 5 * 60 * 1000, maxSize: 10000 }
-    },
-    debug: {
-        enableLidLogging: false,
-        logLevel: 'warn'
-    }
+    performance: {
+        enableCache: true,
+        enableMetrics: true,
+        batchSize: 100,
+        maxRetries: 3
+    },
+    cache: {
+        lidCache: { ttl: 5 * 60 * 1000, maxSize: 10000 },
+        jidCache: { ttl: 5 * 60 * 1000, maxSize: 10000 }
+    },
+    debug: {
+        enableLidLogging: false,
+        logLevel: 'warn'
+    }
 });
 
 // Ottieni configurazione corrente
@@ -510,41 +605,41 @@ Personalizza il socket per performance e comportamento.
 
 ```typescript
 const sock = makeWASocket({
-  // 🔐 Autenticazione
-  auth: state,
-  
-  // 🖥️ UI e Debug
-  printQRInTerminal: true,
-  logger: console, // Usa Pino per logging avanzato
-  browser: ['VareBot', 'Chrome', '4.0.0'],
-  
-  // ⏱️ Timeout e Connessione
-  defaultQueryTimeoutMs: 60000,
-  keepAliveIntervalMs: 30000,
-  connectTimeoutMs: 60000,
-  retryRequestDelayMs: 250,
-  maxMsgRetryCount: 5,
-  
-  // 🎛️ Comportamento
-  markOnlineOnConnect: true,
-  syncFullHistory: false, // Attiva per sync completo (consuma dati)
-  fireInitQueries: true,
-  generateHighQualityLinkPreview: true, // Anteprime link HD
+  // 🔐 Autenticazione
+  auth: state,
+  
+  // 🖥️ UI e Debug
+  printQRInTerminal: true,
+  logger: console, // Usa Pino per logging avanzato
+  browser: ['VareBot', 'Chrome', '4.0.0'],
+  
+  // ⏱️ Timeout e Connessione
+  defaultQueryTimeoutMs: 60000,
+  keepAliveIntervalMs: 30000,
+  connectTimeoutMs: 60000,
+  retryRequestDelayMs: 250,
+  maxMsgRetryCount: 5,
+  
+  // 🎛️ Comportamento
+  markOnlineOnConnect: true,
+  syncFullHistory: false, // Attiva per sync completo (consuma dati)
+  fireInitQueries: true,
+  generateHighQualityLinkPreview: true, // Anteprime link HD
 });
 ```
 
 ### 🛡️ Sicurezza e Crittografia
 
-| Caratteristica            | Descrizione                              |
+| Caratteristica            | Descrizione                              |
 |---------------------------|------------------------------------------|
-| 🔐 End-to-End Encryption | Protocollo Signal per messaggi sicuri   |
-| 🔑 Key Management        | Generazione/rotazione automatica chiavi |
-| 🔍 Authentication        | Sicurezza tramite QR code o pairing code|
-| 🛡️ Data Protection       | Archiviazione sicura credenziali locali |
-
-**Nota:** Evita di condividere file auth per prevenire compromissioni.
+| 🔐 End-to-End Encryption | Protocollo Signal per messaggi sicuri   |
+| 🔑 Key Management        | Generazione/rotazione automatica chiavi |
+| 🔍 Authentication        | Sicurezza tramite QR code o pairing code|
+| 🛡️ Data Protection       | Archiviazione sicura credenziali locali |
 
 ---
+<div align="center">
+
 
 ## 🌐 Supporto e Community
 
@@ -552,11 +647,11 @@ Unisciti alla community per aiuto e contributi.
 
 ### 📞 Contatti e Risorse
 
-| Canale          | Link/Info                              |
+| Canale          | Link/Info                              |
 |-----------------|----------------------------------------|
-| **Email**       | [samakavare1@gmail.com](mailto:samakavare1@gmail.com) |
+| **Email**       | [samakavare1@gmail.com](mailto:samakavare1@gmail.com) |
 | **GitHub Issues**| [Segnala Bug](https://github.com/realvare/based/issues) |
-| **PayPal**      | [Dona](https://www.paypal.me/samakavare) |
+| **PayPal**      | [Dona](https://www.paypal.me/samakavare) |
 | **Canale whatsapp**| [Canale](https://www.whatsapp.com/channel/0029VbB41Sa1Hsq1JhsC1Z1z) |
 
 ---
@@ -565,11 +660,11 @@ Unisciti alla community per aiuto e contributi.
 
 Grazie ai progetti che ispirano Based:
 
-| Progetto                  | Contributo                              |
+| Progetto                  | Contributo                              |
 |---------------------------|-----------------------------------------|
-| [Baileys](https://github.com/WhiskeySockets/Baileys) | API WhatsApp Web originale             |
-| [Yupra](https://www.npmjs.com/package/@yupra/baileys) | Fix LID/JID avanzati                   |
-| [Signal Protocol](https://signal.org/) | Crittografia end-to-end                |
+| [Baileys](https://github.com/WhiskeySockets/Baileys) | API WhatsApp Web originale             |
+| [Yupra](https://www.npmjs.com/package/@yupra/baileys) | Fix LID/JID avanzati                   |
+| [Signal Protocol](https://signal.org/) | Crittografia end-to-end                |
 
 ---
 
@@ -596,13 +691,13 @@ Vedi [LICENSE](LICENSE) per dettagli.
 ### Creato da [realvare](https://github.com/realvare)
 
 <p>
-  <a href="https://github.com/realvare/based"><img src="https://img.shields.io/badge/⭐_Stella_il_Progetto-8a2be2?style=for-the-badge&logo=github&logoColor=white"/></a>
-  <a href="https://github.com/realvare/based/fork"><img src="https://img.shields.io/badge/🔄_Fork_Repository-8a2be2?style=for-the-badge&logo=github&logoColor=white"/></a>
+  <a href="https://github.com/realvare/based"><img src="https://img.shields.io/badge/⭐_Stella_il_Progetto-8a2be2?style=for-the-badge&logo=github&logoColor=white"/></a>
+  <a href="https://github.com/realvare/based/fork"><img src="https://img.shields.io/badge/🔄_Fork_Repository-8a2be2?style=for-the-badge&logo=github&logoColor=white"/></a>
 </p>
 
 <p>
-  <img src="https://img.shields.io/github/contributors/realvare/based?style=for-the-badge&color=8a2be2&labelColor=2d1b69" alt="Contributori"/>
-  <img src="https://img.shields.io/github/last-commit/realvare/based?style=for-the-badge&color=8a2be2&labelColor=2d1b69" alt="Ultimo Commit"/>
+  <img src="https://img.shields.io/github/contributors/realvare/based?style=for-the-badge&color=8a2be2&labelColor=2d1b69" alt="Contributori"/>
+  <img src="https://img.shields.io/github/last-commit/realvare/based?style=for-the-badge&color=8a2be2&labelColor=2d1b69" alt="Ultimo Commit"/>
 </p>
 
 **Se ti è stato utile, valuta di lasciare una stella o di [donare](https://paypal.me/samakavare)!**
