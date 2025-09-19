@@ -451,16 +451,114 @@ await conn.sendMessage(jid, {
 
 ## 🔧 Fix LID/JID nel Proprio Main e Handler
 
-Il supporto LID/JID è un punto di forza di questa libreria, risolvendo problemi comuni come l'identificazione mittenti in gruppi. Ecco come integrarlo nel tuo codice principale e handler.
+Il supporto LID/JID è un punto di forza di questa libreria, risolvendo problemi comuni come l'identificazione mittenti in gruppi e multi-dispositivo. Ecco come integrarlo nel tuo codice principale e handler, basandomi sui metodi estratti dai file forniti (main.js, handler.js e print.js).
 
 ### Best Practices per LID/JID
 
-- **Nel Main (Avvio Bot):** Usa `getSenderLid` e `toJid` per normalizzare ID prima di qualsiasi operazione.
-- **In Handler Messaggi:** Integra nei listener per eventi come `messages.upsert` per gestire mittenti correttamente.
+- **decodeJid(jid)**: Funzione principale per normalizzare JID/LID. Gestisce:
+  - Formati con `:\d+@` (usa `jidNormalizedUser`).
+  - Decodifica user/server in `${user}@${server}`.
+  - Converti `@lid` in `@s.whatsapp.net`.
+  
+  **Esempio di Implementazione (da main.js):**
+  ```typescript
+  decodeJid: (jid) => {
+      if (!jid) return jid;
+      let decoded = jid;
+      if (/:\d+@/gi.test(jid)) {
+          decoded = jidNormalizedUser(jid);
+      }
+      if (typeof decoded === 'object' && decoded.user && decoded.server) {
+          decoded = `${decoded.user}@${decoded.server}`;
+      }
+      if (decoded.endsWith('@lid')) {
+          decoded = decoded.replace('@lid', '@s.whatsapp.net');
+      }
+      return decoded;
+  },
+  ```
+  Usa `conn.decodeJid(jid)` ovunque per normalizzare IDs (es. sender, participant, quoted).
+
+- **Monkey-Patch per groupParticipantsUpdate**: Corregge aggiornamenti partecipanti gruppo trovando il JID reale dal metadata.
+  
+  **Esempio (da handler.js):**
+  ```typescript
+  if (!this.originalGroupParticipantsUpdate) {
+      this.originalGroupParticipantsUpdate = this.groupParticipantsUpdate;
+      this.groupParticipantsUpdate = async function(chatId, users, action) {
+          try {
+              let metadata = global.groupCache.get(chatId);
+              if (!metadata) {
+                  metadata = await fetchGroupMetadataWithRetry(this, chatId);
+                  if (metadata) global.groupCache.set(chatId, metadata);
+              }
+              if (!metadata) {
+                  console.error('[ERRORE] Nessun metadato del gruppo disponibile per un aggiornamento sicuro');
+                  return this.originalGroupParticipantsUpdate.call(this, chatId, users, action);
+              }
+
+              const correctedUsers = users.map(userJid => {
+                  const decoded = this.decodeJid(userJid);
+                  const phone = decoded.split('@')[0].split(':')[0];
+                  const participant = metadata.participants.find(p => {
+                      const pId = this.decodeJid(p.id || p.jid || '');
+                      const pPhone = pId.split('@')[0].split(':')[0];
+                      return pPhone === phone;
+                  });
+                  return participant ? participant.id : userJid; // Fallback all'originale se non trovato
+              });
+
+              return this.originalGroupParticipantsUpdate.call(this, chatId, correctedUsers, action);
+          } catch (e) {
+              console.error('[ERRORE] Errore in safeGroupParticipantsUpdate:', e);
+              throw e;
+          }
+      };
+  }
+  ```
+
+- **Cache per Metadata Gruppo e Admin**: Usa NodeCache per memorizzare metadata e admin, normalizzando con `decodeJid`.
+  
+  **Esempio (da handler.js):**
+  ```typescript
+  global.groupCache = new NodeCache({ stdTTL: 5 * 60, useClones: false });
+  global.adminCache = new NodeCache({ stdTTL: 5 * 60, useClones: false });
+
+  // In participantsUpdate o groups.update:
+  metadata.participants.forEach(u => {
+      const normId = this.decodeJid(u.id);
+      const jid = u.jid || normId;
+      if (u.admin === 'admin' || u.admin === 'superadmin') {
+          adminSet.add(jid);
+          if (jid !== normId) adminSet.add(normId);
+      }
+  });
+  metadata.admins = Array.from(adminSet);
+  global.groupCache.set(update.id, metadata);
+  ```
+
+- **Normalizzazione in Print/Log**: Rimuovi `:xx` dai numeri telefono per clean display.
+  
+  **Esempio (da print.js):**
+  ```typescript
+  function formatPhoneNumber(jid, name) {
+      if (!jid) return 'Sconosciuto';
+      let userPart = jid.split('@')[0];
+      let cleanNumber = userPart.split(':')[0]; // Rimuovi la parte :xx per ottenere il numero reale
+      try {
+          const number = PhoneNumber('+' + cleanNumber).getNumber('international');
+          return number + (name ? ` ~${name}` : '');
+      } catch {
+          return (cleanNumber || '') + (name ? ` ~${name}` : '');
+      }
+  }
+  ```
+
 - **Problemi Comuni e Fix:**
-  - **LID Mancante in Gruppi:** Usa `getSenderLid` per estrarre da messaggi.
-  - **Conversione JID:** Sempre converti con `toJid` per evitare errori in `sendMessage`.
-  - **Multi-Dispositivo:** Assicura compatibilità impostando `syncFullHistory: true` in config.
+  - **LID Mancante in Gruppi:** Usa `decodeJid` e cache metadata per trovare JID reali.
+  - **Conversione JID:** Sempre applica `decodeJid` prima di `sendMessage` o query.
+  - **Multi-Dispositivo:** Imposta `syncFullHistory: true` in config per sync LID.
+  - **Errori in Mention/Quoted:** Normalizza con `decodeJid` in handler per quoted.sender e mentionedJid.
 
 ### Esempio Integrato in Main
 
