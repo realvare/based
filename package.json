@@ -50,7 +50,7 @@
     "cache-manager": "^5.7.6",
     "cheerio": "^1.0.0-rc.12",
     "libphonenumber-js": "^1.10.58",
-    "libsignal": "github:WhiskeySockets/libsignal-node",
+    "libsignal": "github:NaufalYupra/libsignal-node",
     "lodash": "^4.17.21",
     "music-metadata": "^7.12.3",
     "pino": "^9.6",
