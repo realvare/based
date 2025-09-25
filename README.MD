@@ -47,7 +47,7 @@ Inizia creando un bot semplice. Questa sezione include esempi base per l'autenti
 ### Esempio Base - Avvio Bot
 
 ```typescript
-import makeWASocket, { DisconnectReason, useMultiFileAuthState, getPerformanceConfig, setPerformanceConfig } from 'realvare/based';
+import makeWASocket, { DisconnectReason, useMultiFileAuthState, getPerformanceConfig, setPerformanceConfig } from 'based';
 
 // Configura performance e cache
 setPerformanceConfig({
@@ -99,7 +99,7 @@ startBot().catch(console.error);
 ### Gestione Messaggi Base con LID/JID
 
 ```typescript
-import makeWASocket, { getSenderLid, toJid, getCacheStats, validateJid, Logger } from 'realvare/based';
+import makeWASocket, { getSenderLid, toJid, getCacheStats, validateJid, Logger } from 'based';
 
 // ... (codice di creazione sock qui)
 
@@ -564,7 +564,7 @@ Il supporto LID/JID è un punto di forza di questa libreria, risolvendo problemi
 
 ```typescript
 // Nel tuo file main
-import makeWASocket, { getSenderLid, toJid } from 'realvare/based';
+import makeWASocket, { getSenderLid, toJid } from 'based';
 // ... (autenticazione e creazione sock)
 
 conn.ev.on('messages.upsert', async ({ messages }) => {
@@ -610,7 +610,7 @@ export async function handleMessage(sock, msg) {
 La libreria ora include un sistema di cache avanzato per ottimizzare le conversioni LID/JID:
 
 ```typescript
-import { getCacheStats, clearCache, setPerformanceConfig } from 'realvare/based';
+import { getCacheStats, clearCache, setPerformanceConfig } from 'based';
 
 // Configura cache personalizzata
 setPerformanceConfig({
@@ -633,7 +633,7 @@ clearCache();
 ### 🛡️ Validazione JID Avanzata
 
 ```typescript
-import { validateJid, Logger } from 'realvare/based';
+import { validateJid, Logger } from 'based';
 
 const jid = '1234567890@s.whatsapp.net';
 const validation = validateJid(jid);
@@ -648,7 +648,7 @@ if (validation.isValid) {
 ### 📊 Logging Condizionale
 
 ```typescript
-import { Logger, setPerformanceConfig } from 'realvare/based';
+import { Logger, setPerformanceConfig } from 'based';
 
 // Configura logging
 setPerformanceConfig({
@@ -668,7 +668,7 @@ Logger.error('Error occurred');
 ### 🔧 Configurazione Performance
 
 ```typescript
-import { setPerformanceConfig, getPerformanceConfig } from 'realvare/based';
+import { setPerformanceConfig, getPerformanceConfig } from 'based';
 
 // Configurazione completa
 setPerformanceConfig({
