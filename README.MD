@@ -695,6 +695,32 @@ console.log('Cache abilitata:', config.performance.enableCache);
 
 ---
 
+## 🧩 Eventi: LID e JID sempre disponibili (nuovo)
+
+Gli eventi emessi includono campi ausiliari sui messaggi per accedere facilmente sia al JID sia al LID del mittente/partecipante.
+
+```typescript
+conn.ev.on('messages.upsert', ({ messages, type }) => {
+  for (const msg of messages) {
+    // Campi aggiuntivi su msg.key
+    // - remoteJidNormalized: JID normalizzato (es. @s.whatsapp.net)
+    // - remoteLid: LID equivalente del remoteJid
+    // - participantLid: LID equivalente del participant (se presente)
+    const jid = msg.key.remoteJidNormalized || msg.key.remoteJid;
+    const remoteLid = msg.key.remoteLid;
+    const participantLid = msg.key.participantLid;
+
+    if (jid?.endsWith('@s.whatsapp.net')) {
+      conn.sendMessage(jid, { text: `Ciao! LID: ${remoteLid || 'n/d'}` });
+    }
+  }
+});
+```
+
+Questi campi eliminano ambiguità in gruppi e contesti multi-dispositivo dove alcuni eventi riportano LID, altri JID.
+
+---
+
 ## ⚙️ Configurazione Avanzata
 
 Personalizza il socket per performance e comportamento.
