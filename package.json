@@ -1,5 +1,5 @@
 {
-  "name": "based",
+  "name": "@realvare/based",
   "version": "2.5.1",
   "description": "realvare/based",
   "keywords": [
@@ -45,17 +45,17 @@
     "@hapi/boom": "^10.0.1",
     "async-mutex": "^0.5.0",
     "axios": "^1.7.0",
-    "chalk": "^4.1.2",
-    "gradient-string": "^2.0.2",
     "cache-manager": "^5.7.6",
+    "chalk": "^4.1.2",
     "cheerio": "^1.0.0-rc.12",
+    "gradient-string": "^2.0.2",
+    "jimp": "^0.22.10",
     "libphonenumber-js": "^1.10.58",
     "libsignal": "github:NaufalYupra/libsignal-node",
     "lodash": "^4.17.21",
     "music-metadata": "^7.12.3",
     "pino": "^9.6",
     "protobufjs": "^7.2.5",
-    "jimp": "^0.22.10",
     "uuid": "^10.0.0",
     "ws": "^8.18.0"
   },
