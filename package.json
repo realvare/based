@@ -1,7 +1,7 @@
 {
   "name": "@realvare/based",
-  "version": "2.5.1",
-  "description": "realvare/based",
+  "version": "2.5.2",
+  "description": "whatsapp api by sam",
   "keywords": [
     "baileys",
     "whatsapp",
@@ -75,7 +75,7 @@
     "open": "^10.1.0",
     "qrcode-terminal": "^0.12.0",
     "release-it": "^16.1.0",
-    "sharp": "^0.33.0",
+    "sharp": "^0.33.5",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
     "typedoc": "^0.25.12",
