@@ -14,6 +14,10 @@ export interface PerformanceSettings {
     batchSize: number;
     maxRetries: number;
     retryDelay: number;
+    retryBackoffMultiplier: number;
+    maxRetryDelay: number;
+    maxMsgRetryCount: number;
+    memoryThreshold: number;
 }
 
 export interface DebugSettings {

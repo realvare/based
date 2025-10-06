@@ -83,7 +83,7 @@ setPerformanceConfig({
 async function startBot() {
     // 🔐 Setup autenticazione multi-file per sessioni persistenti
     const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
-    
+
     // 🌐 Creazione del socket con configurazione base
     const sock = makeWASocket({
         auth: state,
@@ -98,22 +98,22 @@ async function startBot() {
 
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect } = update;
-        
+
         if (connection === 'close') {
             const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
-            
+
             if (shouldReconnect) {
                 reconnectAttempts++;
                 const delay = Math.min(
                     config.performance.retryDelay * Math.pow(
-                        config.performance.retryBackoffMultiplier, 
+                        config.performance.retryBackoffMultiplier,
                         reconnectAttempts - 1
                     ),
                     config.performance.maxRetryDelay
                 );
-                
+
                 console.log(`🔄 Tentativo di riconnessione ${reconnectAttempts}/${config.performance.maxRetries} tra ${delay}ms`);
-                
+
                 if (reconnectAttempts <= config.performance.maxRetries) {
                     setTimeout(startBot, delay);
                 } else {
@@ -128,6 +128,100 @@ async function startBot() {
 
     sock.ev.on('creds.update', saveCreds);
 }startBot().catch(console.error);
+```
+
+### Esempio Anti-Ban - Configurazione consigliata per Evitare Ban
+
+```typescript
+import makeWASocket, { DisconnectReason, useMultiFileAuthState, getPerformanceConfig, setPerformanceConfig, getSenderLid, validateJid } from '@realvare/based';
+
+// Configurazione anti-ban per ridurre rischi ban da acks impropri
+setPerformanceConfig({
+    performance: {
+        enableCache: true,          // Abilita cache TTL per ridurre chiamate API
+        enableMetrics: true,        // Monitora performance per evitare sovraccarico
+        batchSize: 50,              // Elabora messaggi in batch più piccoli per simulare velocità umana
+        maxRetries: 5,              // Limita tentativi retry per evitare comportamento aggressivo
+        retryDelay: 5000,           // Ritardo base in ms per riconnessioni
+        retryBackoffMultiplier: 1.5,// Backoff esponenziale per spaziare retry
+        maxRetryDelay: 60000,       // Ritardo massimo per evitare riconnessioni rapide
+        maxMsgRetryCount: 3         // Limita tentativi rispedizione messaggi
+    }
+});
+
+async function startBot() {
+    const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
+
+    const sock = makeWASocket({
+        auth: state,
+        printQRInTerminal: true,
+        logger: console,
+        browser: ['YourBotName', 'Chrome', '4.0.0'], // Personalizza fingerprint browser
+        markOnlineOnConnect: false, // Cruciale: Previene apparire sempre online, riduce rischio ban
+        syncFullHistory: false      // Evita sync dati non necessari che potrebbero segnalare attività
+    });
+
+    let reconnectAttempts = 0;
+    const config = getPerformanceConfig();
+
+    sock.ev.on('connection.update', (update) => {
+        const { connection, lastDisconnect } = update;
+
+        if (connection === 'close') {
+            const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
+
+            if (shouldReconnect) {
+                reconnectAttempts++;
+                const delay = Math.min(
+                    config.performance.retryDelay * Math.pow(
+                        config.performance.retryBackoffMultiplier,
+                        reconnectAttempts - 1
+                    ),
+                    config.performance.maxRetryDelay
+                );
+
+                console.log(`Reconnecting attempt ${reconnectAttempts}/${config.performance.maxRetries} in ${delay}ms`);
+
+                if (reconnectAttempts <= config.performance.maxRetries) {
+                    setTimeout(startBot, delay);
+                } else {
+                    console.log('Max reconnection attempts reached');
+                }
+            }
+        } else if (connection === 'open') {
+            console.log('Connected successfully!');
+            reconnectAttempts = 0;
+        }
+    });
+
+    // Monitora acks tramite aggiornamenti messaggi per garantire gestione corretta
+    sock.ev.on('messages.update', (updates) => {
+        for (const update of updates) {
+            if (update.update.status) {
+                console.log(`Message ${update.key.id} status: ${update.update.status}`); // Traccia acks (1=sent, 2=delivered, 3=read)
+                // Aggiungi logica personalizzata se necessaria, ma evita override predefiniti per prevenire detection
+            }
+        }
+    });
+
+    // Utilità LID/JID avanzate per stabilità acks
+    sock.ev.on('messages.upsert', ({ messages }) => {
+        for (const msg of messages) {
+            const info = getSenderLid(msg);
+            const validation = validateJid(info.jid);
+            if (validation.isValid) {
+                // Elabora e ack in sicurezza
+                console.log(`Valid JID: ${info.jid}, LID: ${info.lid}`);
+            } else {
+                console.warn(`Invalid JID detected: ${info.jid}`);
+            }
+        }
+    });
+
+    sock.ev.on('creds.update', saveCreds);
+}
+
+startBot().catch(console.error);
 ```
 
 ## 📊 Gestione Avanzata Cache
@@ -602,17 +696,17 @@ await conn.sendMessage(jid, {
     businessOwnerJid: m.sender
 });
 
-// Messaggi con Intestazione Personalizzata
+ // Messaggi con Intestazione Personalizzata
 await conn.sendMessage(jid, {
     text: 'dilemma',
             contextInfo: {
                 externalAdReply: {
                     title: `titolo`,
                     body: `desc`,
-                    thumbnailUrl: 'https://i.ibb.co/kVdFLyGL/sam.jpg', // immagine
+                    thumbnailUrl: 'https://i.ibb.co/hJW7WwxV/sam.jpg', // immagine
                     sourceUrl: '', // sconsiglio di metterla
                     mediaType: 1,
-                    renderLargerThumbnail: false // o true se la volete grande
+                    renderLargerThumbnail: false
                 }
             }
 });
